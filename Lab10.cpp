@@ -42,20 +42,51 @@ string add(string num1, string num2) {
     return num1;
 }
 
+bool checkValid(string input) {
+    if (!isdigit(input[0]) && input[0] != '+' && input[0] != '-') {
+        return false;
+    }
+
+    bool decimalFound = false;
+    for (int i = 1; i < input.length(); i++) {
+        if (!isdigit(input[i])) {
+            if (input[i] = '.' && !decimalFound) {
+                decimalFound = true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
 Number toNumber(string input) {
     Number returnNumber;
-    if (input[0] == '-') {
-        returnNumber.negative = true;
-    } else {
-        returnNumber.negative = false;
-    }
 
-    if (stringContains(input, '.')) {
-        ;
-    } else {
-        returnNumber.integer = "ues";
-    }
+    if (checkValid(input)) {
+        if (input[0] == '-') {
+            returnNumber.negative = true;
+            input = input.substr(1);
+        } else if (input[0 == '+']) {
+            returnNumber.negative = false;
+            input = input.substr(1);
+        } 
+        else {
+            returnNumber.negative = false;
+        }
 
+        if (stringContains(input, '.')) {
+            vector<string> splitDecimal = splitString(input, '.');
+            returnNumber.integer = splitDecimal[0];
+            returnNumber.decimal = splitDecimal[1];
+        } else {
+            returnNumber.integer = input;
+        }
+
+    } else {
+        cout << "Invalid number format!\n";
+    }
     return returnNumber;
 }
 
@@ -67,6 +98,8 @@ int main() {
     //     cout << charNums[i] << endl;
     // }
 
+    cout << checkValid("Yes hellow") << endl;
+    cout << checkValid("-211.4.5") << endl;
 
     char addedChars = (('2'- charOffset) + ('4' - charOffset)) + charOffset;
 
