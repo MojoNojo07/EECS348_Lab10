@@ -5,6 +5,14 @@
 
 using namespace std;
 
+const int charOffset = 48;
+
+struct Number{
+    string integer;
+    string decimal;
+    bool negative;
+};
+
 // function stolen from my previous lab submission
 vector<string> splitString(string input, char delimiter) {
     vector<string> split = {""};
@@ -19,13 +27,56 @@ vector<string> splitString(string input, char delimiter) {
     return split;
 } 
 
-int main() {
-    string number = "102 205";
-
-    vector<string> splitNumber = splitString(number, ' ');
-
-    for (int i = 0; i < splitNumber.size(); i++) {
-        cout << splitNumber[i] << endl;
+bool stringContains(string input, char target) {
+    for (int i = 0; i < input.length(); i++) {
+        if (input[i] == target) {
+            return true;
+        }
     }
+
+    return false;
+}
+
+string add(string num1, string num2) {
+    num1.insert(num1.begin(), 4, '1');
+    return num1;
+}
+
+Number toNumber(string input) {
+    Number returnNumber;
+    if (input[0] == '-') {
+        returnNumber.negative = true;
+    } else {
+        returnNumber.negative = false;
+    }
+
+    if (stringContains(input, '.')) {
+        ;
+    } else {
+        returnNumber.integer = "ues";
+    }
+
+    return returnNumber;
+}
+
+int main() {
+    // string number = "102 205";
+
+    // vector<int> charNums = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+    // for (int i = 0; i < charNums.size(); i++) {
+    //     cout << charNums[i] << endl;
+    // }
+
+
+    char addedChars = (('2'- charOffset) + ('4' - charOffset)) + charOffset;
+
+    cout << "Added numbers: " << addedChars << endl;
+
+    return 0;
+
+    // vector<string> splitNumber = splitString(number, ' ');
+
+    // string added = add(splitNumber[0], splitNumber[1]);
+    // cout << added << endl;
 
 }
