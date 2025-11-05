@@ -61,6 +61,15 @@ bool checkValid(string input) {
     return true;
 }
 
+string numberToString(Number input) {
+    string returnString;
+    if (input.negative) {
+        returnString += '-';
+    }
+    returnString += input.integer + '.' + input.decimal;
+    return returnString;
+}
+
 Number toNumber(string input) {
     Number returnNumber;
 
@@ -68,7 +77,7 @@ Number toNumber(string input) {
         if (input[0] == '-') {
             returnNumber.negative = true;
             input = input.substr(1);
-        } else if (input[0 == '+']) {
+        } else if (input[0] == '+') {
             returnNumber.negative = false;
             input = input.substr(1);
         } 
@@ -82,6 +91,7 @@ Number toNumber(string input) {
             returnNumber.decimal = splitDecimal[1];
         } else {
             returnNumber.integer = input;
+            returnNumber.decimal = "0";
         }
 
     } else {
@@ -90,26 +100,93 @@ Number toNumber(string input) {
     return returnNumber;
 }
 
+string addStrings(string num1, string num2, bool neg) {
+    string sum;
+
+    if (num1.length() < num2.length()) {
+        num1.insert(num1.begin(), num2.length() - num1.length(), '0');
+    } else {
+        num2.insert(num2.begin(), num1.length() - num2.length(), '0');
+    }
+
+    bool carry = false;
+    for (int i = num1.length() - 1; i >= 0; i--) {
+        int asciiSum;
+        if (neg) {
+            asciiSum = num1[i] - num2[i] + charOffset - carry;
+            carry = false;
+            if (asciiSum - charOffset < 0) {
+                cout << "carrying, jumped from " << asciiSum - charOffset;
+                carry = true;
+                int offset = abs((asciiSum - charOffset))%10;
+                if (offset == 0) {
+                    asciiSum = charOffset;
+                } else {
+                    asciiSum = 10 - offset + charOffset;
+                }
+                if (asciiSum == (10 + charOffset)) {
+                    asciiSum == charOffset;
+                }
+                cout << " down to " << asciiSum - charOffset << endl;
+            } 
+        } else {
+            asciiSum = num1[i] + num2[i] - charOffset + carry;
+            carry = false;
+            if (asciiSum - charOffset > 9) {
+                carry = true;
+                asciiSum = (asciiSum - charOffset)%10 + charOffset;
+            }
+        }
+
+        sum.insert(sum.begin(), asciiSum);
+    }
+
+    string carryChar = "0";
+
+    if (carry && neg) {
+        string oneDigitMore = "1";
+        for (int i = 0; i < num1.length(); i++) {
+            oneDigitMore += '0';
+        }
+        cout << "negativizing by performing " << oneDigitMore << " - " << sum << endl;
+        sum = addStrings(oneDigitMore, sum, true);
+    } else if (carry) {
+        carryChar = "1";
+    }
+
+    return sum;
+}
+
+Number add(Number num1, Number num2) {
+    Number addedNumbers;
+
+    string added;
+    if (num1.negative && num2.negative) {
+        added = addStrings(num1.integer + num1.decimal, num2.integer + num2.decimal, false);
+    } else if (num1.negative) {
+        added = addStrings(num2.integer + num2.decimal, num1.integer + num1.decimal, true);
+    } else if (num2.negative) {
+        added = addStrings(num1.integer + num1.decimal, num2.integer + num2.decimal, true);
+    } else {
+        added = addStrings(num1.integer + num1.decimal, num2.integer + num2.decimal, false);
+    }
+
+    addedNumbers.integer = added;
+
+    return addedNumbers;
+}
+
 int main() {
-    // string number = "102 205";
+    string number = "-905.7 903.6";
 
-    // vector<int> charNums = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    // for (int i = 0; i < charNums.size(); i++) {
-    //     cout << charNums[i] << endl;
-    // }
+    vector<string> splitNumber = splitString(number, ' ');
 
-    cout << checkValid("Yes hellow") << endl;
-    cout << checkValid("-211.4.5") << endl;
+    Number num1 = toNumber(splitNumber[0]);
+    cout << "num1: " << numberToString(num1) << endl;
+    Number num2 = toNumber(splitNumber[1]);
+    cout << "num2: " << numberToString(num2) << endl;
 
-    char addedChars = (('2'- charOffset) + ('4' - charOffset)) + charOffset;
-
-    cout << "Added numbers: " << addedChars << endl;
-
+    cout << "added: " << numberToString(add(num1, num2)) << endl;
+    
     return 0;
-
-    // vector<string> splitNumber = splitString(number, ' ');
-
-    // string added = add(splitNumber[0], splitNumber[1]);
-    // cout << added << endl;
-
 }
