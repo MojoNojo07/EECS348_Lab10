@@ -78,16 +78,20 @@ bool checkValid(string input) {
  * @return the trimmed string
 */
 string trimNumber(string input) {
+    // check for an remove the negative sign so it doesn't mess with checking for 0s
     bool isNegative = false;
     if (input[0] == '-') {
         isNegative = true;
         input.erase(0, 1);
     }
+
     vector<string> splitInput = splitString(input, '.');
 
     // turning these into their own variables to make it a little easier to read
     string integer = splitInput[0];
     string decimal = splitInput[1];
+
+    // loop through the integer until we find a leading number, then cut off everthing before it
     for(int i = 0; i < integer.length(); i++) {
         if(integer[i] == '0') {
             continue;
@@ -97,6 +101,7 @@ string trimNumber(string input) {
         }
     }
 
+    // same as above but for the decimal
     for(int i = decimal.length() - 1; i > 0; i--) {
         if(decimal[i] == '0') {
             continue;
@@ -106,6 +111,7 @@ string trimNumber(string input) {
         }
     }
 
+    // re-add the negative sign (if applicable), since it gets removed
     if (isNegative) {
         integer.insert(integer.begin(), '-');
     }
@@ -188,18 +194,25 @@ string addStrings(string num1, string num2) {
     // keep track of if our number goes below 0
     bool goesNegative = false;
 
+    // the main adding loop
     bool carry = false;
     for (int i = num1.length() - 1; i >= 0; i--) {
         int asciiSum;
+        // act like the decimal isn't there when adding
         if (num1[i] == '.') {
             sum.insert(sum.begin(), '.');
             continue;
         }
+
+        // do subtraction if one of the numbers is negative
         if (num2Negative && !num1Negative) {
+            // the formula here is technically (num1 - charOffset) - (num2 - charOffset) + charOffset - carry, but it simplifies to the formula below
             asciiSum = num1[i] - num2[i] + charOffset - carry;
             carry = false;
 
+            // if we hit a number lower than 0, that means we have to carry
             if (asciiSum - charOffset < 0) {
+                // if we're carrying beyond the final digit in subtraction, that means we've gone lower than 0
                 if (i == 0 && num2Negative) {
                     goesNegative = true;
                 }
@@ -211,7 +224,11 @@ string addStrings(string num1, string num2) {
                     asciiSum = 10 - offset + charOffset;
                 }
             } 
+
+        // if both numbers have the same sign, add them
+        // this is a lot like subtraction, but with less edge cases
         } else {
+            // like above, this is a simplified formula
             asciiSum = num1[i] + num2[i] - charOffset + carry;
             carry = false;
             if (asciiSum - charOffset > 9) {
@@ -223,6 +240,8 @@ string addStrings(string num1, string num2) {
         sum.insert(sum.begin(), asciiSum);
     }
 
+    // if a number goes below 0 using the addition loop above, it ends up becoming 10^n - sum, where n is the number of digits 
+    // so if we just add 10^n to the sum then make the result negative, we get the correct number
     if (goesNegative) {
         string oneDigitMore = "1";
         for (int i = 0; i < splitNum1[0].length() + 1; i++) {
@@ -231,10 +250,15 @@ string addStrings(string num1, string num2) {
         oneDigitMore += ".0";
         sum = addStrings(oneDigitMore, '-' + sum);
         sum.insert(sum.begin(), '-');
+    // if we have a carry and we haven't gone negative, we just need to add a 1 to the beginning
+    // idk how to explain this other than like. 9 + 9 = 18. we added a new digit since we carry past the number of digits in the numbers being added
+    // and that new digit can never be higher than 1
     } else if (carry && !goesNegative) {
         sum.insert(sum.begin(), '1');
     }
 
+    // adding 2 negative numbers is like adding 2 positive numbers except the result is always negative
+    // so if we added 2 negative numbers we just add them normally then tack on the negative sign here
     if (num1Negative && num2Negative) {
         sum.insert(sum.begin(), '-');
     }
@@ -244,6 +268,8 @@ string addStrings(string num1, string num2) {
 }
 
 int main() {
+
+    // get the file name from the user
     string line;
     string fileName;
     cout << "Input the name of your input file (including the file extension): ";
@@ -251,20 +277,30 @@ int main() {
 
     ifstream inputFile(fileName);
 
+    // runs through every line in the file
     if (inputFile.is_open()) {
         while(getline(inputFile, line)) {
+            // separator line for nice formatting
             cout << "=========" << endl;
             vector<string> splitNumbers = splitString(line, ' ');
+
+            // makes sure there isn't the incorrect amount of numbers in a given line
+            // this is mostly to ensure there's at least 2 since that causes index out of bounds problems
+            // but we don't really want any more than 2 numbers either
             if (splitNumbers.size() != 2) {
                 cout << "Lines must have exactly 2 numbers!\n";
                 continue;
             }
+
+            // tacks on a decimal at the end if the number didn't have one originally
             if(!stringContains(splitNumbers[0], '.')) {
                 splitNumbers[0] += ".0";
             }
             if(!stringContains(splitNumbers[1], '.')) {
                 splitNumbers[1] += ".0";
             }
+
+            // prints out the 2 numbers and their sum
             cout << "Number 1: " << splitNumbers[0] << endl;
             cout << "Number 2: " << splitNumbers[1] << endl;
             cout << "Sum of numbers 1 and 2: " << addStrings(splitNumbers[0], splitNumbers[1]) << endl;
