@@ -6,15 +6,22 @@
 
 using namespace std;
 
+// this program does addition by treating each number as its ascii value
+// each number char in ascii is exactly 48 higher than its "actual" value
+// for example, 0 in ascii is 48, 5 in ascii is 53, etc
 const int charOffset = 48;
-
-struct Number{
-    string integer;
-    string decimal;
-    bool negative;
-};
+// while this is technically treating each char as a number, I'm not converting the chars or strings into other data types
+// so this is fully allowed per the assignment guidelines
+// and the only alternative is just using a big, tediously-long switch statement for every possible combination of numbers
+// the ascii thing is a much more elegant solution and takes advantage of unique the way c++ handles data
+// plus I do have to consider how to carry between digits when adding and keep track of the decimal, so I feel it's still in the spirit of the assignment
 
 // function stolen from my previous lab submission
+/** splits a string into a vector based on a user-specified delimiter 
+ * @param input the string to split
+ * @param delimiter the char to act as a delimiter
+ * @return a vector, with each element being part of the string split by the delimiter
+*/
 vector<string> splitString(string input, char delimiter) {
     vector<string> split = {""};
     for (char character : input) {
@@ -28,6 +35,11 @@ vector<string> splitString(string input, char delimiter) {
     return split;
 } 
 
+/** checks if a string contains a specified char.
+ * @param input the string to search through
+ * @param target the char to search for
+ * @return true if the string contains the character, false if not
+ */
 bool stringContains(string input, char target) {
     for (int i = 0; i < input.length(); i++) {
         if (input[i] == target) {
@@ -38,11 +50,10 @@ bool stringContains(string input, char target) {
     return false;
 }
 
-string add(string num1, string num2) {
-    num1.insert(num1.begin(), 4, '1');
-    return num1;
-}
-
+/** Checks to make sure a number string contains only 1 decimal and no letters
+ * @param input the string to check
+ * @return true if the string is valid, false if not
+ */
 bool checkValid(string input) {
     if (!isdigit(input[0]) && input[0] != '+' && input[0] != '-') {
         return false;
@@ -62,7 +73,10 @@ bool checkValid(string input) {
     return true;
 }
 
-/** Removes extra */
+/** Removes extra 0s from a number string
+ * @param input the string to trim
+ * @return the trimmed string
+*/
 string trimNumber(string input) {
     bool isNegative = false;
     if (input[0] == '-') {
@@ -91,6 +105,7 @@ string trimNumber(string input) {
             continue;
         } else {
             decimal = decimal.substr(0, i);
+            break;
         }
     }
 
@@ -102,10 +117,17 @@ string trimNumber(string input) {
     
 }
 
+/** Adds 2 number strings together
+ * @param num1 the first number
+ * @param num2 the second number
+ * @return the sum of the two numbers as a string
+ */
 string addStrings(string num1, string num2) {
     bool num1Negative = false;
     bool num2Negative = false;
     string sum;
+
+    // makes sure num1 is a valid number, and handles its negative sign if it has one
     if (checkValid(num1)) {
         if (num1[0] == '-') {
             num1Negative = true;
@@ -120,6 +142,7 @@ string addStrings(string num1, string num2) {
         return num1 + " is an invalid input!";
     }
 
+    // same as above but for num2
     if (checkValid(num2)) {
         if (num2[0] == '-') {
             num2Negative = true;
@@ -134,6 +157,7 @@ string addStrings(string num1, string num2) {
         return num2 + " is an invalid input!";
     }
 
+    // if num1 is negative and num2 isn't, swap em
     if (num1Negative && !num2Negative) {
         string temp = num1;
         num1 = num2;
@@ -173,7 +197,7 @@ string addStrings(string num1, string num2) {
             sum.insert(sum.begin(), '.');
             continue;
         }
-        if (num2Negative) {
+        if (num2Negative && !num1Negative) {
             asciiSum = num1[i] - num2[i] + charOffset - carry;
             carry = false;
 
@@ -214,10 +238,10 @@ string addStrings(string num1, string num2) {
     }
 
     if (num1Negative && num2Negative) {
-        sum += '-';
+        sum.insert(sum.begin(), '-');
     }
 
-
+    // trim the sum so it doesn't have any unnecessary 0s
     return trimNumber(sum);
 }
 
