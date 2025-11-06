@@ -62,32 +62,40 @@ bool checkValid(string input) {
     return true;
 }
 
-
+/** Removes extra */
 string trimNumber(string input) {
+    bool isNegative = false;
+    if (input[0] == '-') {
+        isNegative = true;
+        input.erase(0, 1);
+    }
     vector<string> splitInput = splitString(input, '.');
+
+    // turning these into their own variables to make it a little easier to read
     string integer = splitInput[0];
     string decimal = splitInput[1];
     
     bool leadingNumberFound = false;
-    for(int i = 0; i < integer.length() && !leadingNumberFound; i++) {
-        if(isdigit(integer[i])) {
-            if(integer[i] != '0') {
-                leadingNumberFound = true;
-            } else {
-                integer.erase(i);
-            }
+    for(int i = 0; i < integer.length(); i++) {
+        if(integer[i] == '0') {
+            continue;
+        } else {
+            integer = integer.substr(i);
+            break;
         }
     }
 
     leadingNumberFound = false;
-    for(int i = decimal.length(); i > 0 && !leadingNumberFound; i--) {
-        if(isdigit(decimal[i])) {
-            if(decimal[i] != '0') {
-                leadingNumberFound = true;
-            } else {
-                decimal.erase(i);
-            }
+    for(int i = decimal.length(); i > 0; i--) {
+        if(decimal[i] == '0' && !leadingNumberFound) {
+            continue;
+        } else {
+            decimal = decimal.substr(0, i);
         }
+    }
+
+    if (isNegative) {
+        integer.insert(integer.begin(), '-');
     }
 
     return integer + '.' + decimal;
@@ -210,7 +218,7 @@ string addStrings(string num1, string num2) {
     }
 
 
-    return sum;
+    return trimNumber(sum);
 }
 
 int main() {
