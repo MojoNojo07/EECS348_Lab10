@@ -216,7 +216,7 @@ string addStrings(string num1, string num2) {
 int main() {
     string line;
     string fileName;
-    cout << "Input the name of your input file (including the file extension)\n";
+    cout << "Input the name of your input file (including the file extension): ";
     cin >> fileName;
 
     ifstream inputFile(fileName);
@@ -235,12 +235,12 @@ int main() {
             if(!stringContains(splitNumbers[1], '.')) {
                 splitNumbers[1] += ".0";
             }
-            cout << "num1: " << splitNumbers[0] << endl;
-            cout << "num2: " << splitNumbers[1] << endl;
-            cout << "added: " << addStrings(splitNumbers[0], splitNumbers[1]) << endl;
+            cout << "Number 1: " << splitNumbers[0] << endl;
+            cout << "Number 2: " << splitNumbers[1] << endl;
+            cout << "Sum of numbers 1 and 2: " << addStrings(splitNumbers[0], splitNumbers[1]) << endl;
         }
     } else {
-        cout << "Could not open the input file!\n";
+        cout << "Could not find an input file called " << fileName << "!\n";
     }
     
     return 0;
