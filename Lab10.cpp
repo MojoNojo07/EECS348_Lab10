@@ -215,7 +215,11 @@ string addStrings(string num1, string num2) {
 
 int main() {
     string line;
-    ifstream inputFile("inputfile.txt");
+    string fileName;
+    cout << "Input the name of your input file (including the file extension)\n";
+    cin >> fileName;
+
+    ifstream inputFile(fileName);
 
     if (inputFile.is_open()) {
         while(getline(inputFile, line)) {
