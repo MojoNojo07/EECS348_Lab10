@@ -88,8 +88,6 @@ string trimNumber(string input) {
     // turning these into their own variables to make it a little easier to read
     string integer = splitInput[0];
     string decimal = splitInput[1];
-    
-    bool leadingNumberFound = false;
     for(int i = 0; i < integer.length(); i++) {
         if(integer[i] == '0') {
             continue;
@@ -99,9 +97,8 @@ string trimNumber(string input) {
         }
     }
 
-    leadingNumberFound = false;
-    for(int i = decimal.length(); i > 0; i--) {
-        if(decimal[i] == '0' && !leadingNumberFound) {
+    for(int i = decimal.length() - 1; i > 0; i--) {
+        if(decimal[i] == '0') {
             continue;
         } else {
             decimal = decimal.substr(0, i);
@@ -188,6 +185,7 @@ string addStrings(string num1, string num2) {
         }
     }
 
+    // keep track of if our number goes below 0
     bool goesNegative = false;
 
     bool carry = false;
