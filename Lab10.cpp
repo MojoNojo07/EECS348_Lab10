@@ -62,37 +62,36 @@ bool checkValid(string input) {
     return true;
 }
 
-string numberToString(Number input) {
-    return input.integer;
-}
 
-Number toNumber(string input) {
-    Number returnNumber;
-
-    if (checkValid(input)) {
-        if (input[0] == '-') {
-            returnNumber.negative = true;
-            input = input.substr(1);
-        } else if (input[0] == '+') {
-            returnNumber.negative = false;
-            input = input.substr(1);
-        } else {
-            returnNumber.negative = false;
+string trimNumber(string input) {
+    vector<string> splitInput = splitString(input, '.');
+    string integer = splitInput[0];
+    string decimal = splitInput[1];
+    
+    bool leadingNumberFound = false;
+    for(int i = 0; i < integer.length() && !leadingNumberFound; i++) {
+        if(isdigit(integer[i])) {
+            if(integer[i] != '0') {
+                leadingNumberFound = true;
+            } else {
+                integer.erase(i);
+            }
         }
-
-        if (stringContains(input, '.')) {
-            vector<string> splitDecimal = splitString(input, '.');
-            returnNumber.integer = splitDecimal[0];
-            returnNumber.decimal = splitDecimal[1];
-        } else {
-            returnNumber.integer = input;
-            returnNumber.decimal = "0";
-        }
-
-    } else {
-        cout << "Invalid number format!\n";
     }
-    return returnNumber;
+
+    leadingNumberFound = false;
+    for(int i = decimal.length(); i > 0 && !leadingNumberFound; i--) {
+        if(isdigit(decimal[i])) {
+            if(decimal[i] != '0') {
+                leadingNumberFound = true;
+            } else {
+                decimal.erase(i);
+            }
+        }
+    }
+
+    return integer + '.' + decimal;
+    
 }
 
 string addStrings(string num1, string num2) {
@@ -102,29 +101,29 @@ string addStrings(string num1, string num2) {
     if (checkValid(num1)) {
         if (num1[0] == '-') {
             num1Negative = true;
-            num1 = num1.substr(1);
+            num1.erase(0, 1);
         } else if (num1[0] == '+') {
             num1Negative = false;
-            num1 = num1.substr(1);
+            num1.erase(0, 1);
         } else {
             num1Negative = false;
         }
     } else {
-        return "["+ num1 + "] is an invalid input!";
+        return num1 + " is an invalid input!";
     }
 
     if (checkValid(num2)) {
         if (num2[0] == '-') {
             num2Negative = true;
-            num2 = num2.substr(1);
+            num2.erase(0, 1);
         } else if (num2[0] == '+') {
             num2Negative = false;
-            num2 = num1.substr(1);
+            num2.erase(0, 1);
         } else {
             num2Negative = false;
         }
     } else {
-        return "["+ num2 + "] is an invalid input!";
+        return num2 + " is an invalid input!";
     }
 
     if (num1Negative && !num2Negative) {
@@ -135,10 +134,26 @@ string addStrings(string num1, string num2) {
         num1Negative = false;
     }
 
-    if (num1.length() < num2.length()) {
-        num1.insert(num1.begin(), num2.length() - num1.length(), '0');
+    // equalizes the lengths of each number by adding 0s
+    vector<string> splitNum1 = splitString(num1, '.');
+    vector<string> splitNum2 = splitString(num2, '.');
+
+    // adds 0s to the beginning of the shortest number to equalize integer length
+    if (splitNum1[0].length() < splitNum2[0].length()) {
+        num1.insert(num1.begin(), splitNum2[0].length() - splitNum1[0].length(), '0');
     } else {
-        num2.insert(num2.begin(), num1.length() - num2.length(), '0');
+        num2.insert(num2.begin(), splitNum1[0].length() - splitNum2[0].length(), '0');
+    }
+
+    // adds 0s to the end of the shortest number to equalize decimal length
+    if (splitNum1[1].length() < splitNum2[1].length()) {
+        for (int i = 0; i < splitNum2[1].length() - splitNum1[1].length(); i++) {
+            num1 += '0';
+        }
+    } else {
+        for (int i = 0; i < splitNum1[1].length() - splitNum2[1].length(); i++) {
+            num2 += '0';
+        }
     }
 
     bool goesNegative = false;
@@ -158,7 +173,6 @@ string addStrings(string num1, string num2) {
                 if (i == 0 && num2Negative) {
                     goesNegative = true;
                 }
-                cout << "carrying, jumped from " << asciiSum - charOffset;
                 carry = true;
                 int offset = abs((asciiSum - charOffset))%10;
                 if (offset == 0) {
@@ -166,7 +180,6 @@ string addStrings(string num1, string num2) {
                 } else {
                     asciiSum = 10 - offset + charOffset;
                 }
-                cout << " down to " << asciiSum - charOffset << endl;
             } 
         } else {
             asciiSum = num1[i] + num2[i] - charOffset + carry;
@@ -182,10 +195,10 @@ string addStrings(string num1, string num2) {
 
     if (goesNegative) {
         string oneDigitMore = "1";
-        for (int i = 0; i < num1.length(); i++) {
+        for (int i = 0; i < splitNum1[0].length() + 1; i++) {
             oneDigitMore += '0';
         }
-        cout << "negativizing by performing " << oneDigitMore << " - " << sum << endl;
+        oneDigitMore += ".0";
         sum = addStrings(oneDigitMore, '-' + sum);
         sum.insert(sum.begin(), '-');
     } else if (carry && !goesNegative) {
@@ -196,6 +209,7 @@ string addStrings(string num1, string num2) {
         sum += '-';
     }
 
+
     return sum;
 }
 
@@ -205,11 +219,21 @@ int main() {
 
     if (inputFile.is_open()) {
         while(getline(inputFile, line)) {
+            cout << "=========" << endl;
             vector<string> splitNumbers = splitString(line, ' ');
+            if (splitNumbers.size() != 2) {
+                cout << "Lines must have exactly 2 numbers!\n";
+                continue;
+            }
+            if(!stringContains(splitNumbers[0], '.')) {
+                splitNumbers[0] += ".0";
+            }
+            if(!stringContains(splitNumbers[1], '.')) {
+                splitNumbers[1] += ".0";
+            }
             cout << "num1: " << splitNumbers[0] << endl;
             cout << "num2: " << splitNumbers[1] << endl;
             cout << "added: " << addStrings(splitNumbers[0], splitNumbers[1]) << endl;
-            cout << "=========" << endl;
         }
     } else {
         cout << "Could not open the input file!\n";
